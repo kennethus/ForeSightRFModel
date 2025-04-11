@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: fastapi-ml
+    env: python
+    plan: free
+    buildCommand: ""
+    startCommand: ./start.sh
+    repo: https://github.com/yourusername/your-repo-name
+    branch: main
