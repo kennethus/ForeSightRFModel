@@ -4,9 +4,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import pandas as pd
 import numpy as np
+import os
 
+current_dir = os.path.dirname(os.path.abspath(__file__))
+model_path = os.path.join(current_dir, "SocioDemoRFModel.pkl")
 
-with open('SocioDemoRFModel.pkl', 'rb') as f:
+with open(model_path, 'rb') as f:
     model = pickle.load(f)
 
 app = FastAPI()
@@ -85,8 +88,10 @@ def preprocess_input(raw_input: dict, reference_columns: list) -> pd.DataFrame:
     return df_input
 
 
-# Load reference column structure
-reference_df = pd.read_csv("dataset/Student-Spending-Habits_PreProcessed.csv")
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+csv_path = os.path.join(BASE_DIR, "dataset", "Student-Spending-Habits_PreProcessed.csv")
+
+reference_df = pd.read_csv(csv_path)
 reference_columns = reference_df.drop(columns=[
     "Living_Expenses", "Food_and_Dining_Expenses", 
     "Transportation_Expenses", "Leisure_and_Entertainment_Expenses", 
