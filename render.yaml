@@ -5,5 +5,5 @@ services:
     plan: free
     buildCommand: ""
     startCommand: ./start.sh
-    repo: https://github.com/yourusername/your-repo-name
+    repo: https://github.com/kennethus/ForeSightRFModel
     branch: main

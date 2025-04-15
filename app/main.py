@@ -5,9 +5,13 @@ from pydantic import BaseModel
 import pandas as pd
 import numpy as np
 import os
+from app import Exponential
+from typing import List
+from sklearn.metrics import r2_score
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 model_path = os.path.join(current_dir, "SocioDemoRFModel.pkl")
+rf_model_r2 = 0.85
 
 with open(model_path, 'rb') as f:
     model = pickle.load(f)
@@ -36,10 +40,8 @@ def convert_to_numeric(value):
 def preprocess_input(raw_input: dict, reference_columns: list) -> pd.DataFrame:
     df_input = pd.DataFrame([raw_input])
 
-    # Convert Monthly Allowance
     df_input["Monthly_Allowance"] = df_input["Monthly_Allowance"].apply(convert_to_numeric)
 
-    # Mappings
     age_mapping = {"Under 18": 1, "18-20": 2, "21-23": 3, "24-26": 4, "27 and above": 5}
     year_level_mapping = {"Freshman": 1, "Sophomore": 2, "Junior": 3, "Senior": 4}
     roommates_mapping = {
@@ -66,27 +68,22 @@ def preprocess_input(raw_input: dict, reference_columns: list) -> pd.DataFrame:
     df_input["Family_Monthly_Income"] = df_input["Family_Monthly_Income"].map(income_mapping)
     df_input["Frequency_of_Going_Home"] = df_input["Frequency_of_Going_Home"].map(going_home_mapping)
 
-    # Encode Yes/No
     yes_no_cols = [col for col in df_input.columns if df_input[col].dropna().isin(["Yes", "No"]).all()]
     df_input[yes_no_cols] = df_input[yes_no_cols].apply(lambda x: x.map({"Yes": 1, "No": 0}))
 
-    # One-hot encode other categorical columns
     categorical_cols = df_input.select_dtypes(include=['object']).columns.tolist()
     categorical_cols = [col for col in categorical_cols if col not in yes_no_cols]
     df_input = pd.get_dummies(df_input, columns=categorical_cols, drop_first=True)
 
-    # Align with reference columns
     for col in reference_columns:
         if col not in df_input.columns:
             df_input[col] = 0
-    df_input = df_input[reference_columns]  # Ensure column order
+    df_input = df_input[reference_columns]
 
-    # Ensure all boolean columns are int
     for col in df_input.select_dtypes(include=['bool']).columns:
         df_input[col] = df_input[col].astype(int)
 
     return df_input
-
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 csv_path = os.path.join(BASE_DIR, "dataset", "Student-Spending-Habits_PreProcessed.csv")
@@ -98,7 +95,6 @@ reference_columns = reference_df.drop(columns=[
     "Academic_Expenses"
 ]).columns.tolist()
 
-# Define request schema using Pydantic
 class UserInput(BaseModel):
     Age_Group: str
     Sex: str
@@ -121,30 +117,81 @@ class UserInput(BaseModel):
     Have_Health_Concern: str
     Preferred_Payment_Method: str
 
+class ExpenseItem(BaseModel):
+    userId: str
+    name: str
+    totalAmount: float
+    category: str
+    type: str
+    description: str
+    date: str
+
+class PreviousForecast(BaseModel):
+    userId: str
+    forecasted: List[float]
+    dates: List[str]
+
+class CombinedInput(BaseModel):
+    user_data: UserInput
+    transactions: List[ExpenseItem] | None
+    previous_forcast: PreviousForecast | None
 
 @app.get("/")
 def home():
     return {"health_check": "OK"}
 
-@app.post("/predict")
-def predict_expenses(user_input: UserInput):
-    # Convert to dict, then preprocess
-    input_dict = user_input.model_dump()
-    input_df = preprocess_input(input_dict, reference_columns)
-    
-    # Predict using model
-    prediction = model.predict(input_df)[0]
 
-    # Define output keys
-    expense_keys = [
-        "Living_Expenses",
-        "Food_and_Dining_Expenses",
-        "Transportation_Expenses",
-        "Leisure_and_Entertainment_Expenses",
+
+@app.post("/predict")
+def combined_predict(data: CombinedInput):
+    # Predict from RF
+    input_df = preprocess_input(data.user_data.model_dump(), reference_columns)
+    rf_preds = model.predict(input_df)[0]
+    rf_categories = [
+        "Living_Expenses", "Food_and_Dining_Expenses", 
+        "Transportation_Expenses", "Leisure_and_Entertainment_Expenses", 
         "Academic_Expenses"
     ]
+    rf_pred_dict = dict(zip(rf_categories, rf_preds.tolist()))
+    rf_total = sum(rf_preds)
 
-    # Return as JSON response
-    return dict(zip(expense_keys, prediction.tolist()))
+    if data.transactions is not None or data.previous_forcast is not None:
+        # Forecast from Exponential Smoothing
+        txn_dicts = [t.model_dump() for t in data.transactions]
+        es_prediction = Exponential.forecast_expenses(txn_dicts, data.previous_forcast)
 
 
+        if es_prediction["success"] == True:
+            es_r2 = es_prediction["metrics"]["r2"]   
+
+            if es_r2 < (1 - rf_model_r2):
+                es_r2 = 1 - rf_model_r2
+
+            # Confidence weighted combination
+            combined_total = es_r2 * es_prediction["metrics"]["total_forecasted"] + (1 - es_r2) * rf_total
+
+            # Rescale RF predictions to match combined total
+            scaling_factor = combined_total / rf_total if rf_total != 0 else 0
+            scaled_rf = {k: v * scaling_factor for k, v in rf_pred_dict.items()}
+
+            return {
+                "es_success": True,
+                "combined_total": combined_total,
+                "categories": scaled_rf,
+                "rf_total": rf_total,
+                "es_prediction": es_prediction,
+                "es_r2_score": es_r2
+            }
+        #There is no enough transactions to generate prediciton from Exponential Smoothing
+        else:
+            return {
+                "es_success": False,
+                "categories": rf_pred_dict,
+                "rf_total": rf_total
+            }
+    else:
+        return {
+            "es_success": False,
+            "categories": rf_pred_dict,
+            "rf_total": rf_total
+        }

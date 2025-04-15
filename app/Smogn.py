@@ -1,10 +1,12 @@
 import numpy as np
 import pandas as pd
 import smogn
+import os
 
 # Load the dataset
-file_path = "dataset/Student-Spending-Habits.csv"
-df = pd.read_csv(file_path)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+csv_path = os.path.join(BASE_DIR, "dataset", "Student-Spending-Habits.csv")
+df = pd.read_csv(csv_path)
 
 print(df.head())
 
@@ -127,6 +129,9 @@ from operator import or_
 augmented_data = pd.concat(augmented_dataframes, ignore_index=True).drop_duplicates()
 
 # Save to CSV
-output_path = "dataset/Student-Spending-Habits_PreProcessed.csv"
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+output_path = os.path.join(BASE_DIR, "dataset", "Student-Spending-Habits_PreProcessed.csv")
+
 augmented_data.to_csv(output_path, index=False)
 print(f"✅ Saved combined dataset with synthetic rows at: {output_path}")

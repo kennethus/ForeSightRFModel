@@ -6,10 +6,12 @@ from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 import matplotlib.pyplot as plt
 import pickle
+import os
 
 # Load the dataset
-file_path = "dataset/Student-Spending-Habits_PreProcessed.csv"
-df = pd.read_csv(file_path)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+csv_path = os.path.join(BASE_DIR, "dataset", "Student-Spending-Habits_PreProcessed.csv")
+df = pd.read_csv(csv_path)
 
 # Target columns
 expense_cols = ["Living_Expenses", "Food_and_Dining_Expenses", 
@@ -54,7 +56,11 @@ multioutput_regressor.fit(X_train, Y_train)
 #     print(f"Best parameters for target {i+1}:", estimator.best_params_)
 
 #Save model
-with open('SocioDemoRFModel.pkl', 'wb') as f:
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+model_path = os.path.join(current_dir, "SocioDemoRFModel.pkl")
+
+with open(model_path, 'wb') as f:
     pickle.dump(multioutput_regressor, f)
 print("Model trained and saved successfully")
 
