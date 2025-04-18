@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 import os
 from app import Exponential
-from typing import List
+from typing import List, Optional
 from sklearn.metrics import r2_score
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -133,8 +133,8 @@ class PreviousForecast(BaseModel):
 
 class CombinedInput(BaseModel):
     user_data: UserInput
-    transactions: List[ExpenseItem] | None
-    previous_forcast: PreviousForecast | None
+    transactions: Optional[List[ExpenseItem]] = None
+    previous_forcast: Optional[PreviousForecast] = None
 
 @app.get("/")
 def home():
@@ -157,15 +157,29 @@ def combined_predict(data: CombinedInput):
 
     if data.transactions is not None or data.previous_forcast is not None:
         # Forecast from Exponential Smoothing
-        txn_dicts = [t.model_dump() for t in data.transactions]
-        es_prediction = Exponential.forecast_expenses(txn_dicts, data.previous_forcast)
+        txn_dicts = [t.model_dump() for t in data.transactions] if data.transactions else []
+        if data.previous_forcast is not None:
+            es_prediction = Exponential.forecast_expenses(txn_dicts, data.previous_forcast)
+        else:
+            es_prediction = {
+                "success": False,
+                "message": "Previous forecast missing.",
+                "metrics": {}
+            }
+
 
 
         if es_prediction["success"] == True:
             es_r2 = es_prediction["metrics"]["r2"]   
 
-            if es_r2 < (1 - rf_model_r2):
-                es_r2 = 1 - rf_model_r2
+            # if es_r2 < (1 - rf_model_r2):
+            #     if es_r2 < 0:
+            #         es_r2 = 0
+            #     else:
+            #         es_r2 = 1 - rf_model_r2
+
+            if es_r2 < 0:
+                es_r2 = 0
 
             # Confidence weighted combination
             combined_total = es_r2 * es_prediction["metrics"]["total_forecasted"] + (1 - es_r2) * rf_total
