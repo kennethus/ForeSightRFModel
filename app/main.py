@@ -155,55 +155,36 @@ def combined_predict(data: CombinedInput):
     rf_pred_dict = dict(zip(rf_categories, rf_preds.tolist()))
     rf_total = sum(rf_preds)
 
-    if data.transactions is not None or data.previous_forcast is not None:
-        # Forecast from Exponential Smoothing
-        txn_dicts = [t.model_dump() for t in data.transactions] if data.transactions else []
-        if data.previous_forcast is not None:
-            es_prediction = Exponential.forecast_expenses(txn_dicts, data.previous_forcast)
-        else:
-            es_prediction = {
-                "success": False,
-                "message": "Previous forecast missing.",
-                "metrics": {}
-            }
+    # Prepare transactions for Exponential Smoothing
+    txn_dicts = [t.model_dump() for t in data.transactions] if data.transactions else []
 
+    # Forecast from Exponential Smoothing
+    es_prediction = Exponential.forecast_expenses(txn_dicts, data.previous_forcast)
 
+    if es_prediction["success"]:
+        es_r2 = es_prediction["metrics"].get("r2", 1 - rf_model_r2) #Default is 0.15
+        es_total = es_prediction["metrics"]["total_forecasted"]
 
-        if es_prediction["success"] == True:
-            es_r2 = es_prediction["metrics"]["r2"]   
+        # Clamp r2 to [0, 1]
+        es_r2 = max(es_r2, 0)
 
-            # if es_r2 < (1 - rf_model_r2):
-            #     if es_r2 < 0:
-            #         es_r2 = 0
-            #     else:
-            #         es_r2 = 1 - rf_model_r2
+        # Confidence-weighted total
+        combined_total = es_r2 * es_total + (1 - es_r2) * rf_total
 
-            if es_r2 < 0:
-                es_r2 = 0
+        # Rescale RF predictions to match combined total
+        scaling_factor = combined_total / rf_total if rf_total != 0 else 0
+        scaled_rf = {k: v * scaling_factor for k, v in rf_pred_dict.items()}
 
-            # Confidence weighted combination
-            combined_total = es_r2 * es_prediction["metrics"]["total_forecasted"] + (1 - es_r2) * rf_total
-
-            # Rescale RF predictions to match combined total
-            scaling_factor = combined_total / rf_total if rf_total != 0 else 0
-            scaled_rf = {k: v * scaling_factor for k, v in rf_pred_dict.items()}
-
-            return {
-                "es_success": True,
-                "combined_total": combined_total,
-                "categories": scaled_rf,
-                "rf_total": rf_total,
-                "es_prediction": es_prediction,
-                "es_r2_score": es_r2
-            }
-        #There is no enough transactions to generate prediciton from Exponential Smoothing
-        else:
-            return {
-                "es_success": False,
-                "categories": rf_pred_dict,
-                "rf_total": rf_total
-            }
+        return {
+            "es_success": True,
+            "combined_total": combined_total,
+            "categories": scaled_rf,
+            "rf_total": rf_total,
+            "es_prediction": es_prediction,
+            "es_r2_score": es_r2
+        }
     else:
+        # Fall back to RF-only predictions
         return {
             "es_success": False,
             "categories": rf_pred_dict,
