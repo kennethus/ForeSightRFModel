@@ -6,8 +6,8 @@ from datetime import datetime, timedelta
 fake = Faker()
 
 # Parameters
-start_date = datetime(2025, 1, 1)
-end_date = datetime(2025, 3, 31)
+start_date = datetime(2025, 4, 1)
+end_date = datetime(2025, 4, 30)
 monthly_allowance = 10000
 daily_food_range = (100, 200)
 rent_amount = 2500
@@ -137,5 +137,5 @@ while current_date <= end_date:
 
 # Save to CSV
 df = pd.DataFrame(transactions)
-df.to_csv("../dataset/realistic_student_transactions_jan_to_mar_2025.csv", index=False)
-print("CSV file created: realistic_student_transactions_jan_to_mar_2025.csv")
+df.to_csv("../dataset/realistic_student_transactions_april_2025.csv", index=False)
+print("CSV file created")

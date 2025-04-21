@@ -33,7 +33,7 @@ def forecast_expenses(data_json, previous_forecast=None, test_size=30):
 
         # 6. Forecast
         forecast = model_fit.forecast(test_size)
-        
+
         # Get the last date in your data
         last_date = df_daily_expenses.index[-1]
 
@@ -54,9 +54,12 @@ def forecast_expenses(data_json, previous_forecast=None, test_size=30):
 
         # 7. Optional evaluation using previous forecast
         if previous_forecast:
+            
             forecasted_values = previous_forecast.forecasted
-            forecasted_dates = pd.to_datetime(previous_forecast.dates)
+            forecasted_dates = pd.to_datetime(previous_forecast.dates).tz_localize(None)
             previous_forecast_series = pd.Series(forecasted_values, index=forecasted_dates)
+            actual_previous_expense.index = actual_previous_expense.index.tz_localize(None)
+
             previous_forecast_series = previous_forecast_series.loc[actual_previous_expense.index]
 
             mae = mean_absolute_error(actual_previous_expense['amount'], previous_forecast_series)

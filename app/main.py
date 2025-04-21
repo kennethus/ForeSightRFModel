@@ -139,7 +139,7 @@ class PreviousForecast(BaseModel):
 class CombinedInput(BaseModel):
     user_data: UserInput
     transactions: Optional[List[ExpenseItem]] = None
-    previous_forcast: Optional[PreviousForecast] = None
+    previous_forecast: Optional[PreviousForecast] = None
 
 @app.get("/")
 def home():
@@ -150,6 +150,7 @@ def home():
 @app.post("/predict")
 def combined_predict(data: CombinedInput):
     # Predict from RF
+
     input_df = preprocess_input(data.user_data.model_dump(), reference_columns)
     rf_preds = model.predict(input_df)[0]
     rf_categories = [
@@ -164,7 +165,7 @@ def combined_predict(data: CombinedInput):
     txn_dicts = [t.model_dump() for t in data.transactions] if data.transactions else []
 
     # Forecast from Exponential Smoothing
-    es_prediction = Exponential.forecast_expenses(txn_dicts, data.previous_forcast)
+    es_prediction = Exponential.forecast_expenses(txn_dicts, data.previous_forecast)
 
     if es_prediction["success"]:
         es_r2 = es_prediction["metrics"].get("r2", 1 - rf_model_r2) #Default is 0.15
