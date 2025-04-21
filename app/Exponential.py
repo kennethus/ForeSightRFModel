@@ -42,11 +42,11 @@ def forecast_expenses(data_json, previous_forecast=None, test_size=30):
 
         # Assign those to forecast
         forecast.index = future_dates
-
+        
         result = {
             "success": True,
             "forecast": forecast.tolist(),
-            "dates": forecast.index.strftime('%Y-%m-%d').tolist(),
+            "dates": forecast.index.strftime('%Y-%m-%dT%H:%M:%S.000+00:00').tolist(),
             "metrics": {
                 "total_forecasted": forecast.sum()
             }
