@@ -33,7 +33,15 @@ def forecast_expenses(data_json, previous_forecast=None, test_size=30):
 
         # 6. Forecast
         forecast = model_fit.forecast(test_size)
-        forecast.index = actual_previous_expense.index
+        
+        # Get the last date in your data
+        last_date = df_daily_expenses.index[-1]
+
+        # Generate future dates starting from the next day
+        future_dates = pd.date_range(start=last_date + pd.Timedelta(days=1), periods=test_size)
+
+        # Assign those to forecast
+        forecast.index = future_dates
 
         result = {
             "success": True,
