@@ -6,8 +6,8 @@ from datetime import datetime, timedelta
 fake = Faker()
 
 # Parameters
-start_date = datetime(2025, 4, 1)
-end_date = datetime(2025, 4, 30)
+start_date = datetime(2025, 1, 1)
+end_date = datetime(2025, 3, 30)
 monthly_allowance = 10000
 daily_food_range = (100, 200)
 rent_amount = 2500

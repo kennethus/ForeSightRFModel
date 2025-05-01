@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 import os
 from app import Exponential
+from app import adjustment
 from typing import List, Optional
 from sklearn.metrics import r2_score
 
@@ -90,6 +91,26 @@ def preprocess_input(raw_input: dict, reference_columns: list) -> pd.DataFrame:
 
     return df_input
 
+def rescale_predictions(categories, total):
+
+    print("Adjusting categories to:", total)
+    categories_total = sum(categories.values())
+    scaling_factor = total / categories_total if categories_total != 0 else 0
+    scaled = {k: v * scaling_factor for k, v in categories.items()}
+    return scaled
+
+def append_scaling_message(messages: dict, scaled_budgets: dict) -> dict:
+    updated_messages = {}
+    for category, message in messages.items():
+        scaled_amount = scaled_budgets.get(category)
+        if scaled_amount is not None:
+            new_message = f"{message} But since the total budget amount exceeded your monthly allowance, it is scaled down to {scaled_amount:.2f}."
+            updated_messages[category] = new_message
+        else:
+            # If somehow scaled_budgets missing a category, just keep the original
+            updated_messages[category] = message
+    return updated_messages
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 csv_path = os.path.join(BASE_DIR, "dataset", "Student-Spending-Habits_PreProcessed.csv")
 
@@ -131,10 +152,18 @@ class ExpenseItem(BaseModel):
     description: str
     date: str
 
+class PreviousCategoryPrediction(BaseModel):
+    living_expenses: float
+    food_and_dining_expenses: float
+    transportation_expenses: float
+    academic_expenses: float
+    leisure_and_entertainment_expenses: float
+
 class PreviousForecast(BaseModel):
     userId: str
     forecasted: List[float]
     dates: List[str]
+    category: PreviousCategoryPrediction
 
 class CombinedInput(BaseModel):
     user_data: UserInput
@@ -178,21 +207,78 @@ def combined_predict(data: CombinedInput):
         combined_total = es_r2 * es_total + (1 - es_r2) * rf_total
 
         # Rescale RF predictions to match combined total
-        scaling_factor = combined_total / rf_total if rf_total != 0 else 0
-        scaled_rf = {k: v * scaling_factor for k, v in rf_pred_dict.items()}
+        scaled_rf = rescale_predictions(rf_pred_dict, combined_total)
 
-        return {
-            "es_success": True,
-            "combined_total": combined_total,
-            "categories": scaled_rf,
-            "rf_total": rf_total,
-            "es_prediction": es_prediction,
-            "es_r2_score": es_r2
-        }
+        if(data.previous_forecast):
+            adjusted_category = adjustment.budget_adjustment(txn_dicts, data.previous_forecast.category, scaled_rf)
+
+            if (sum(adjusted_category["adjusted_predictions"].values()) > float(data.user_data.Monthly_Allowance)):
+                scaled = rescale_predictions(adjusted_category["adjusted_predictions"], float(data.user_data.Monthly_Allowance))
+                scaled_message  = append_scaling_message(adjusted_category["messages"], scaled)
+
+                return {
+                    "prediction_exceed": True,
+                    "es_success": True,
+                    "combined_total": sum(adjusted_category["adjusted_predictions"].values()),
+                    "categories": scaled,
+                    "adjustment_info": scaled_message,
+                    "rf_total": rf_total,
+                    "es_prediction": es_prediction,
+                    "es_r2_score": es_r2
+                }
+            else: 
+                return {
+                    "prediction_exceed": False,
+                    "es_success": True,
+                    "combined_total": sum(adjusted_category["adjusted_predictions"].values()),
+                    "categories": adjusted_category["adjusted_predictions"],
+                    "adjustment_info": adjusted_category["messages"],
+                    "rf_total": rf_total,
+                    "es_prediction": es_prediction,
+                    "es_r2_score": es_r2
+                }
+        else:
+            if(combined_total > float(data.user_data.Monthly_Allowance)):
+                scaled = rescale_predictions(rf_pred_dict, float(data.user_data.Monthly_Allowance))
+                
+
+                return {
+                    "prediction_exceed": True,
+                    "es_success": True,
+                    "combined_total": combined_total,
+                    "categories": scaled,
+                    "rf_total": rf_total,
+                    "es_prediction": es_prediction,
+                    "es_r2_score": es_r2
+                } 
+            else:
+                return {
+                        "prediction_exceed": False,
+                        "es_success": True,
+                        "combined_total": combined_total,
+                        "categories": scaled_rf,
+                        "rf_total": rf_total,
+                        "es_prediction": es_prediction,
+                        "es_r2_score": es_r2
+                    } 
     else:
+
+        if(rf_total > float(data.user_data.Monthly_Allowance)):
+            scaled = rescale_predictions(rf_pred_dict, float(data.user_data.Monthly_Allowance))
+
+            return {
+            "prediction_exceed": True,
+            "es_success": False,
+            "es_message": str(es_prediction["message"]),
+            "categories": scaled,
+            "rf_total": rf_total
+        }
+
         # Fall back to RF-only predictions
         return {
+            "prediction_exceed": False,
             "es_success": False,
+            "es_message": str(es_prediction["message"]),
             "categories": rf_pred_dict,
             "rf_total": rf_total
         }

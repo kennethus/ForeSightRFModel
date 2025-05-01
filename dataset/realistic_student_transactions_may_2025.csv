@@ -1,0 +1,82 @@
+name,description,totalAmount,category,type,date
+Bus Fare,Daily commute,14.42,Transportation,Expense,2025-05-01
+Bus Fare,Daily commute,14.59,Transportation,Expense,2025-05-01
+Daily Food,Meal and drink,181.28,Food and Dining,Expense,2025-05-02
+Jeep Fare,Daily commute,19.0,Transportation,Expense,2025-05-02
+Daily Food,Meal and drink,193.29,Food and Dining,Expense,2025-05-03
+Ride Share,Daily commute,15.4,Transportation,Expense,2025-05-03
+Tricycle Fare,Daily commute,20.04,Transportation,Expense,2025-05-03
+Spotify,Leisure or entertainment,271.71,Leisure and Entertainment,Expense,2025-05-03
+Notebook,Academic supplies or materials,218.5,Academic,Expense,2025-05-03
+Daily Food,Meal and drink,173.55,Food and Dining,Expense,2025-05-04
+Jeep Fare,Daily commute,17.21,Transportation,Expense,2025-05-04
+Lab Manual,Academic supplies or materials,343.09,Academic,Expense,2025-05-04
+Daily Food,Meal and drink,148.67,Food and Dining,Expense,2025-05-05
+Tricycle Fare,Daily commute,22.39,Transportation,Expense,2025-05-05
+Netflix,Leisure or entertainment,211.91,Leisure and Entertainment,Expense,2025-05-05
+Ride Share,Daily commute,22.13,Transportation,Expense,2025-05-06
+Bus Fare,Daily commute,19.51,Transportation,Expense,2025-05-06
+Daily Food,Meal and drink,158.16,Food and Dining,Expense,2025-05-07
+Ride Share,Daily commute,12.75,Transportation,Expense,2025-05-07
+Daily Food,Meal and drink,124.11,Food and Dining,Expense,2025-05-08
+Daily Food,Meal and drink,125.2,Food and Dining,Expense,2025-05-09
+Bus Fare,Daily commute,29.4,Transportation,Expense,2025-05-09
+Tricycle Fare,Daily commute,26.84,Transportation,Expense,2025-05-09
+Mobile Game,Leisure or entertainment,299.56,Leisure and Entertainment,Expense,2025-05-09
+Daily Food,Meal and drink,156.23,Food and Dining,Expense,2025-05-10
+Bus Fare,Daily commute,29.14,Transportation,Expense,2025-05-10
+Daily Food,Meal and drink,121.54,Food and Dining,Expense,2025-05-11
+Daily Food,Meal and drink,127.04,Food and Dining,Expense,2025-05-12
+Ride Share,Daily commute,26.45,Transportation,Expense,2025-05-12
+Spotify,Leisure or entertainment,241.12,Leisure and Entertainment,Expense,2025-05-12
+Bus Fare,Daily commute,12.0,Transportation,Expense,2025-05-13
+Ride Share,Daily commute,24.43,Transportation,Expense,2025-05-13
+Daily Food,Meal and drink,186.69,Food and Dining,Expense,2025-05-14
+Daily Food,Meal and drink,199.79,Food and Dining,Expense,2025-05-15
+Bus Fare,Daily commute,20.55,Transportation,Expense,2025-05-15
+Netflix,Leisure or entertainment,113.48,Leisure and Entertainment,Expense,2025-05-15
+Daily Food,Meal and drink,110.83,Food and Dining,Expense,2025-05-16
+Ride Share,Daily commute,10.48,Transportation,Expense,2025-05-16
+Daily Food,Meal and drink,107.68,Food and Dining,Expense,2025-05-17
+Ride Share,Daily commute,9.43,Transportation,Expense,2025-05-17
+Photocopy,Academic supplies or materials,146.18,Academic,Expense,2025-05-17
+Daily Food,Meal and drink,194.88,Food and Dining,Expense,2025-05-18
+Daily Food,Meal and drink,175.45,Food and Dining,Expense,2025-05-19
+Jeep Fare,Daily commute,13.74,Transportation,Expense,2025-05-19
+Jeep Fare,Daily commute,16.97,Transportation,Expense,2025-05-19
+Snack Out,Leisure or entertainment,135.56,Leisure and Entertainment,Expense,2025-05-19
+Bus Fare,Daily commute,16.73,Transportation,Expense,2025-05-20
+Ride Share,Daily commute,18.16,Transportation,Expense,2025-05-20
+Daily Food,Meal and drink,158.69,Food and Dining,Expense,2025-05-21
+Daily Food,Meal and drink,128.86,Food and Dining,Expense,2025-05-22
+Jeep Fare,Daily commute,11.54,Transportation,Expense,2025-05-22
+Jeep Fare,Daily commute,16.97,Transportation,Expense,2025-05-22
+Movie Ticket,Leisure or entertainment,111.46,Leisure and Entertainment,Expense,2025-05-22
+Daily Food,Meal and drink,143.21,Food and Dining,Expense,2025-05-23
+Jeep Fare,Daily commute,16.99,Transportation,Expense,2025-05-23
+Bus Fare,Daily commute,17.07,Transportation,Expense,2025-05-23
+Daily Food,Meal and drink,144.31,Food and Dining,Expense,2025-05-24
+Jeep Fare,Daily commute,24.64,Transportation,Expense,2025-05-24
+Tricycle Fare,Daily commute,14.91,Transportation,Expense,2025-05-24
+Book,Academic supplies or materials,354.56,Academic,Expense,2025-05-24
+Daily Food,Meal and drink,144.63,Food and Dining,Expense,2025-05-25
+Jeep Fare,Daily commute,23.92,Transportation,Expense,2025-05-25
+Bus Fare,Daily commute,20.59,Transportation,Expense,2025-05-25
+Daily Food,Meal and drink,131.08,Food and Dining,Expense,2025-05-26
+Jeep Fare,Daily commute,27.73,Transportation,Expense,2025-05-26
+Jeep Fare,Daily commute,16.68,Transportation,Expense,2025-05-26
+Bus Fare,Daily commute,16.27,Transportation,Expense,2025-05-27
+Daily Food,Meal and drink,168.39,Food and Dining,Expense,2025-05-28
+Ride Share,Daily commute,24.1,Transportation,Expense,2025-05-28
+Bus Fare,Daily commute,11.64,Transportation,Expense,2025-05-28
+Monthly Allowance,Allowance from parents,10000.0,Leisure and Entertainment,Income,2025-05-28
+Monthly Rent,Boarding house rent,2500.0,Living,Expense,2025-05-28
+Daily Food,Meal and drink,185.81,Food and Dining,Expense,2025-05-29
+Bus Fare,Daily commute,21.57,Transportation,Expense,2025-05-29
+Bus Fare,Daily commute,27.77,Transportation,Expense,2025-05-29
+Electricity Bill,Monthly electric bill,396.48,Living,Expense,2025-05-29
+Daily Food,Meal and drink,111.83,Food and Dining,Expense,2025-05-30
+Bus Fare,Daily commute,11.7,Transportation,Expense,2025-05-30
+Jeep Fare,Daily commute,21.49,Transportation,Expense,2025-05-30
+WiFi Bill,Internet service fee,351.0,Living,Expense,2025-05-30
+Daily Food,Meal and drink,130.66,Food and Dining,Expense,2025-06-01
