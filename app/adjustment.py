@@ -122,7 +122,7 @@ def budget_adjustment(data_json, previous_forecast=None, current_forecast=None):
             confidence_scores[category] = confidence
             adjusted_predictions[category] = adjusted
 
-            # 🆕 Generate the message
+            # Generate the message
             message = generate_adjustment_message(
                 category_label=category_actual[category],
                 actual=actual,
